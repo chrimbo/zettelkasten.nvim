@@ -213,7 +213,7 @@ local function get_context(all_ids, note_id)
 end
 
 local function generate_note_id()
-    return vim.fn.strftime("%Y-%m-%d-%H-%M-%S")
+    return vim.fn.strftime("%Y%m%d%H%M%S")
 end
 
 function M.completefunc(find_start, base)
@@ -244,11 +244,9 @@ function M.completefunc(find_start, base)
 end
 
 function M.set_note_id(bufnr)
-    local first_line = vim.api.nvim_buf_get_lines(bufnr, 0, 1, true)[1]
     local zk_id = generate_note_id()
     if #zk_id > 0 then
-        first_line, _ = string.gsub(first_line, "# ", "")
-        api.nvim_buf_set_lines(bufnr, 0, 1, true, { "# " .. zk_id .. " " .. first_line })
+        vim.cmd([[%s:<title>:]]..zk_id..[[:]])
         vim.cmd("file " .. zk_id .. ".md")
     else
         log.notify("There's already a note with the same ID.", log_levels.ERROR, { tag = true })

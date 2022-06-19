@@ -19,7 +19,13 @@ _G.zettelkasten = {
             vim.cmd("lcd " .. config.notes_path)
         end
 
-        vim.cmd("normal ggI# New Note")
+        vim.cmd([[
+            normal ggI---
+            normal otitle: <title>
+            normal otags: 
+            normal osource: 
+            normal o---
+            ]])
         require("zettelkasten").set_note_id(vim.api.nvim_get_current_buf())
         vim.cmd("normal $")
     end,

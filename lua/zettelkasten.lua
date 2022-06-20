@@ -5,9 +5,9 @@ local log = require("zettelkasten.log")
 local config = require("zettelkasten.config")
 local formatter = require("zettelkasten.formatter")
 
-local s_zk_id_pattern = "%d+-%d+-%d+-%d+-%d+-%d+"
-local s_zk_id_regexp = "[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+-[0-9]+"
-local s_zk_file_name_pattern = "%d+-%d+-%d+-%d+-%d+-%d+.md"
+local s_zk_id_pattern = "%d%d%d%d%d%d%d%d%d%d%d%d%d%d"
+local s_zk_id_regexp = "[[:digit:]]{14}"
+local s_zk_file_name_pattern = "%d%d%d%d%d%d%d%d%d%d%d%d%d%d.md"
 
 local function get_grepprg()
     local grepprg = vim.opt_local.grepprg:get()
@@ -182,7 +182,7 @@ local function get_all_ids(base)
         search_str = s_zk_id_regexp
     end
 
-    local references = run_grep("# " .. search_str)
+    local references = run_grep("title: " .. search_str)
 
     local words = {}
     for _, word in ipairs(references) do
@@ -191,8 +191,8 @@ local function get_all_ids(base)
             log.notify("Cannot find the ID.", log_levels.DEBUG, { tag = true })
         else
             local file_name = string.match(word, s_zk_file_name_pattern)
-            local context = string.match(word, "# " .. s_zk_id_pattern .. " .*")
-            context = string.gsub(context, " " .. s_zk_id_pattern, "")
+            local context = string.match(word, "title: " .. s_zk_id_pattern .. " .*")
+            context = string.gsub(context, "title: " .. s_zk_id_pattern .. "", "")
             if word ~= base then
                 table.insert(words, { id = zk_id, context = context, file_name = file_name })
             end
@@ -321,7 +321,11 @@ function M.keyword_expr(word, opts)
 end
 
 function M.get_references(note_id, all_ids)
-    local references = run_grep("[[" .. note_id .. "]]", nil, { "-F" })
+    local references = run_grep( note_id )
+    file = io.open("/home/chrimbo/test.log", "a")
+    file:write(note_id)
+    file:write( ":" .. #references .. "\n")
+    file:close()
 
     local words = {}
     for _, word in ipairs(references) do
